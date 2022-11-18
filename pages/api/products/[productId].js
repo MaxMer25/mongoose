@@ -14,6 +14,21 @@ async function handler(req, res) {
       } catch (error) {
         return res.status(500).json({ error: error.message });
       }
+
+    case "DELETE":
+      try {
+        const deletedProduct = await Product.findByIdAndDelete(
+          req.query.productId
+        );
+        if (deletedProduct) {
+          return res.status(200).json(deletedProduct);
+        } else {
+          return res.status(404).json({ error: "product not found" });
+        }
+      } catch (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
     default:
       return res.status(400).json({ error: "method not supported" });
   }

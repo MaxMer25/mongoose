@@ -7,6 +7,8 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState(null); //"Food", "Technology"
 
+  // GET PRODUCT
+
   useEffect(() => {
     const getProducts = async () => {
       try {
@@ -29,6 +31,54 @@ const Products = () => {
     };
     getProducts();
   }, [categoryFilter]);
+
+  // DELTE PRODUCT
+
+  async function deleteProduct(idToDelete) {
+    const url = `api/products/` + idToDelete;
+    try {
+      const response = await fetch(url, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(products.filter((product) => product._id !== data._id));
+      } else {
+        throw new Error(`Fetch fehlgeschlagen mit Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
+
+  // POST PRODUCT
+
+  async function createProduct(event) {
+    // event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.target));
+    const newProduct = {
+      name: data.name,
+      category: data.category,
+      detail: data.detail,
+    };
+
+    try {
+      const url = `/api/products/`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+      alert(error.message);
+    }
+  }
 
   return (
     <>
@@ -58,10 +108,27 @@ const Products = () => {
             return (
               <li key={product._id}>
                 <Link href={`/products/${product._id}`}>{product.name}</Link>
+                <button onClick={() => deleteProduct(product._id)}>
+                  DELETE
+                </button>
               </li>
             );
           })}
         </ul>
+        <h2>Add a Product!</h2>
+        <form onSubmit={createProduct}>
+          <fieldset>
+            <label htmlFor="name">Product Name</label>
+            <input name="name" required></input>
+            <br />
+            <label htmlFor="category">Product Category</label>
+            <input name="category" required></input>
+            <br />
+            <label htmlFor="detail">Product Detail</label>
+            <input name="detail" required></input>
+          </fieldset>
+          <button type="submit">Submit</button>
+        </form>
       </div>
     </>
   );
